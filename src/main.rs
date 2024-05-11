@@ -61,16 +61,17 @@ pub struct ColorBuffer {
     channels: usize,
 }
 impl ColorBuffer {
-    fn set(self: &mut Self, x: usize, y: usize, color: &Vec3) {
-        let index = ((y * self.width + x) * self.channels);
+    fn set(self: &mut Self, x: usize, y: usize, color: &Vec3)->bool {
+        let index: usize = ((y * self.width + x) * self.channels);
         self.buffer[index] = color.r;
         self.buffer[index + 1] = color.g;
         self.buffer[index + 2] = color.b;
+        return true;
     }
 }
 struct Point {
-    x: i32,
-    y: i32,
+    x: i64,
+    y: i64,
 }
 fn line(p0: &Point, p1: &Point, buffer: &mut ColorBuffer, color: &Vec3) {
     let x0 = p0.x;
@@ -78,8 +79,8 @@ fn line(p0: &Point, p1: &Point, buffer: &mut ColorBuffer, color: &Vec3) {
     let x1 = p1.x;
     let y1 = p1.y;
 
-    let dx = i32::abs(x0 - x1);
-    let dy = i32::abs(y0 - y1);
+    let dx = i64::abs(x0 - x1);
+    let dy = i64::abs(y0 - y1);
 
     let mut err = dx - dy;
     let mut err2;
@@ -176,14 +177,15 @@ impl Model {
             for i in 0..3 {
                 let vec0: Vec3f = self.vertices[face.indices[i]];
                 let vec1: Vec3f = self.vertices[face.indices[(i + 1) % 3]];
-                let p0: Point = Point {
-                    x: (vec0.x as i32) * (img.width as i32) / 2,
-                    y: (vec0.y as i32) * (img.height as i32) / 2,
-                };
-                let p1: Point = Point {
-                    x: (vec1.x as i32) * (img.width as i32) / 2,
-                    y: (vec1.y as i32) * (img.height as i32) / 2,
-                };
+
+                let x0 = ((vec0.x * (img.width as f64)) / 2.0) as i64;
+                let y0 = ((vec0.y * (img.height as f64)) / 2.0) as i64;
+                let x1 = ((vec1.x * (img.width as f64)) / 2.0) as i64;
+                let y1 = ((vec1.y * (img.height as f64)) / 2.0) as i64;
+
+                let p0: Point = Point { x: x0, y: y0 };
+                let p1: Point = Point { x: x1, y: y1 };
+
                 line(&p0, &p1, img, &Color::Green.vec3().unwrap());
             }
         }
@@ -198,7 +200,7 @@ fn main() {
         channels: CHANNELS,
     };
 
-    let filename = String::from("naruto.obj");
+    let filename = String::from("african_head.obj");
     let model = Model::new(filename).unwrap();
     model.draw(&mut img);
     save_tga(&img.buffer, WIDTH, HEIGHT, "lol.tga").unwrap();
