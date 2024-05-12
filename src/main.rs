@@ -3,9 +3,9 @@ use image::ExtendedColorType;
 use std::io::{BufRead, BufReader};
 use std::{fs::File, io::BufWriter};
 
-const WIDTH: usize = 1080;
-const HEIGHT: usize = 1080;
-const CHANNELS: usize = 4;
+const WIDTH: usize = 900;
+const HEIGHT: usize = 900;
+const CHANNELS: usize = 3;
 const BYTES: usize = WIDTH * HEIGHT * CHANNELS;
 
 fn save_tga(
@@ -31,7 +31,8 @@ fn save_tga(
             &flipped_buffer,
             width as u32,
             height as u32,
-            ExtendedColorType::Rgba8,
+            //ExtendedColorType::Rgba8,
+            ExtendedColorType::Rgb8,
         )
         .unwrap();
     Ok(())
@@ -103,7 +104,7 @@ fn line(p0: &Point, p1: &Point, buffer: &mut Vec<u8>, alpha: u8, color: &Vec3) {
             buffer[index] = color.r;
             buffer[index + 1] = color.g;
             buffer[index + 2] = color.b;
-            buffer[index + 3] = alpha;
+            //buffer[index + 3] = alpha;
         }
 
         err2 = 2 * err;
@@ -244,7 +245,7 @@ impl Model {
 
         self.vertices = normalized_vertices.to_vec();
     }
-    pub fn draw(self: &Self, img: &mut ColorBuffer, alpha: u8) {
+    pub fn draw(self: &Self, img: &mut ColorBuffer, alpha: u8, color: Vec3) {
         for face in &self.faces {
             for i in 0..3 {
                 let vec0: Vec3f = self.vertices[face.indices[i]];
@@ -259,7 +260,7 @@ impl Model {
                 let p0: Point = Point { x: x0, y: y0 };
                 let p1: Point = Point { x: x1, y: y1 };
 
-                line(&p0, &p1, &mut img.buffer, alpha,&Color::Black.vec3().unwrap());
+                line(&p0, &p1, &mut img.buffer, alpha, &color);
             }
         }
         let img_name = format!("./tga/{}.tga", &self.file_name);
@@ -284,5 +285,6 @@ fn main() {
     }
     let mut model = Model::new(filename).unwrap();
     model.normalize_vertices();
-    model.draw(&mut img, 255);
+    let alpha = 255;
+    model.draw(&mut img, alpha, Color::White.vec3().unwrap());
 }
