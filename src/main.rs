@@ -3,8 +3,8 @@ use image::ExtendedColorType;
 use std::io::{BufRead, BufReader};
 use std::{fs::File, io::BufWriter};
 
-const WIDTH: usize = 900;
-const HEIGHT: usize = 900;
+const WIDTH: usize = 2500;
+const HEIGHT: usize = 4500;
 const CHANNELS: usize = 3;
 const BYTES: usize = WIDTH * HEIGHT * CHANNELS;
 
@@ -286,5 +286,5 @@ fn main() {
     let mut model = Model::new(filename).unwrap();
     model.normalize_vertices();
     let alpha = 255;
-    model.draw(&mut img, alpha, Color::White.vec3().unwrap());
+    model.draw(&mut img, alpha, Color::Black.vec3().unwrap());
 }
